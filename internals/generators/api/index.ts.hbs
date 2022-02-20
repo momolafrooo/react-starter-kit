@@ -1,0 +1,50 @@
+import { rootApi } from '../';
+
+import { {{ properCase apiName }} } from './types';
+
+
+ export const {{ properCase apiName }}Api = rootApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getAll{{ properCase apiName }}: builder.query<{{ properCase apiName }}[], void>({
+      query: () => `/{{ lowerCase apiName }}`,
+    }),
+    
+    get{{ properCase apiName }}ById: builder.query<{{ properCase apiName }}, number>({
+      query: (id: number) => `/{{ lowerCase apiName }}/${id}`,
+    }),
+
+    save{{ properCase apiName }}: builder.mutation<{{ properCase apiName }}, {{ properCase apiName }}>({
+      query: (payload: {{ properCase apiName }}) => ({
+        url: `/{{ lowerCase apiName }}`,
+        method: "POST",
+        body: payload,
+      })
+    }),
+
+    update{{ properCase apiName }}: builder.mutation<{{ properCase apiName }}, {{ properCase apiName }}>({
+      query: (payload: {{ properCase apiName }}) => ({
+        url: `/{{ properCase apiName }}`,
+        method: "PUT",
+        body: payload,
+      })
+    }),
+
+    delete{{ properCase apiName }}: builder.mutation<{{ properCase apiName }}, number>({
+      query: (id: number) => ({
+        url: `/{{ lowerCase apiName }}/${id}`,
+        method: "DELETE",
+      })
+    }),
+  }),
+  overrideExisting: false,
+})
+
+// Export hooks for usage in function components, which are
+// auto-generated based on the defined endpoints
+export const { 
+  useGet{{ properCase apiName }}ByIdQuery, 
+  useGetAll{{ properCase apiName }}Query, 
+  useSave{{ properCase apiName }}Mutation, 
+  useUpdate{{ properCase apiName }}Mutation, 
+  useDelete{{ properCase apiName }}Mutation 
+} = {{ properCase apiName }}Api
