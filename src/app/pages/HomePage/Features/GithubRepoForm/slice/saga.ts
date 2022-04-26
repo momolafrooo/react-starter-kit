@@ -16,7 +16,7 @@ export function* getRepos() {
     yield put(actions.repoError(RepoErrorType.USERNAME_EMPTY));
     return;
   }
-  const requestURL = `https://api.github.com/users/${username}/repos?type=all&sort=updated`;
+  const requestURL = ``;
 
   try {
     // Call our request helper (see 'utils/request')

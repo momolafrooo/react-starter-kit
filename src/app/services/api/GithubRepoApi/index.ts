@@ -12,6 +12,11 @@ export const GithubRepoApi = rootApi.injectEndpoints({
       query: (id: number) => `/githubrepo/${id}`,
     }),
 
+    getGithubRepoByUsername: builder.query<GithubRepo[], string>({
+      query: (username: string) =>
+        `/users/${username}/repos?type=all&sort=updated`,
+    }),
+
     saveGithubRepo: builder.mutation<GithubRepo, GithubRepo>({
       query: (payload: GithubRepo) => ({
         url: `/githubrepo`,
@@ -46,4 +51,5 @@ export const {
   useSaveGithubRepoMutation,
   useUpdateGithubRepoMutation,
   useDeleteGithubRepoMutation,
+  useGetGithubRepoByUsernameQuery,
 } = GithubRepoApi;

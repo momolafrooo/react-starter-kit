@@ -1,46 +1,24 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components/macro';
-import { useSelector, useDispatch } from 'react-redux';
 import { FormLabel } from 'app/components/FormLabel';
 import { Input } from './components/Input';
 import { RepoItem } from './RepoItem';
 import { TextButton } from './components/TextButton';
-import {
-  selectUsername,
-  selectRepos,
-  selectLoading,
-  selectError,
-} from './slice/selectors';
 import { LoadingIndicator } from 'app/components/LoadingIndicator';
-import { RepoErrorType } from './slice/types';
-import { useGithubRepoFormSlice } from './slice';
+import { useGetGithubRepoByUsernameQuery } from 'app/services/api/GithubRepoApi';
+import { skipToken } from '@reduxjs/toolkit/dist/query/react';
 
 export function GithubRepoForm() {
-  const { actions } = useGithubRepoFormSlice();
-
-  const username = useSelector(selectUsername);
-  const repos = useSelector(selectRepos);
-  const isLoading = useSelector(selectLoading);
-  const error = useSelector(selectError);
-
-  const dispatch = useDispatch();
+  const [username, setUsername] = useState<string>('react-boilerplate');
+  const {
+    data: repos = [],
+    isLoading,
+    error,
+  } = useGetGithubRepoByUsernameQuery(username);
 
   const onChangeUsername = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(actions.changeUsername(evt.currentTarget.value));
-    dispatch(actions.loadRepos());
+    setUsername(evt.currentTarget.value);
   };
-
-  const useEffectOnMount = (effect: React.EffectCallback) => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(effect, []);
-  };
-
-  useEffectOnMount(() => {
-    // When initial state username is not null, submit the form to load repos
-    if (username && username.trim().length > 0) {
-      dispatch(actions.loadRepos());
-    }
-  });
 
   const onSubmitForm = (evt?: React.FormEvent<HTMLFormElement>) => {
     /* istanbul ignore next  */
@@ -63,9 +41,9 @@ export function GithubRepoForm() {
           {isLoading && <LoadingIndicator small />}
         </InputWrapper>
       </FormGroup>
-      {repos?.length > 0 ? (
+      {repos!.length > 0 ? (
         <List>
-          {repos.map(repo => (
+          {repos!.map(repo => (
             <RepoItem
               key={repo.id}
               name={repo.name}
@@ -75,26 +53,21 @@ export function GithubRepoForm() {
           ))}
         </List>
       ) : error ? (
-        <ErrorText>{repoErrorText(error)}</ErrorText>
+        <ErrorText>{'data' in error && getErrorText(error.data)}</ErrorText>
       ) : null}
     </Wrapper>
   );
 }
 
-export const repoErrorText = (error: RepoErrorType) => {
-  switch (error) {
-    case RepoErrorType.USER_NOT_FOUND:
-      return 'There is no such user 😞';
-    case RepoErrorType.USERNAME_EMPTY:
-      return 'Type any Github username';
-    case RepoErrorType.USER_HAS_NO_REPO:
-      return 'User has no repository 🥺';
-    case RepoErrorType.GITHUB_RATE_LIMIT:
-      return 'Looks like github api`s rate limit(60 request/h) has exceeded 🤔';
-    default:
-      return 'An error has occurred!';
+function getErrorText(error: any) {
+  if (error.message) {
+    return error.message;
   }
-};
+  if (error.data) {
+    return JSON.stringify(error.data);
+  }
+  return 'Unknown error';
+}
 
 const Wrapper = styled.div`
   ${TextButton} {
